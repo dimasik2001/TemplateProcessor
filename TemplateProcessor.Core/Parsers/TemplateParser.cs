@@ -24,6 +24,7 @@ namespace TemplateProcessor.Core.Parsers
                 result = null;
                 return false;
             }
+            template = template.Trim('{', '}');
             var splittedTokens = template.Split('.');
             var rootName = splittedTokens[0];
             var isExists = false;
