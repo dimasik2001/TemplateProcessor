@@ -6,7 +6,6 @@ namespace TemplateProcessor.Core.TemplateStructureModels
 {
     public class TemplateDescriptor
     {
-        public Dictionary<string, object> SingleTemplateEntities { get; }
-        public Dictionary<string, IEnumerable<object>> CollectionTemplateEntities { get; }
+        public Dictionary<string, object> TemplateEntities { get; set; } = new Dictionary<string, object>();
     }
 }

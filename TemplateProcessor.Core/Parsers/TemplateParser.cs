@@ -12,7 +12,7 @@ namespace TemplateProcessor.Core.Parsers
     {
         private readonly TemplateDescriptor templateDescriptor;
 
-        public TemplateParser(TemplateDescriptor templateDescriptor) 
+        public TemplateParser(TemplateDescriptor templateDescriptor)
         {
             this.templateDescriptor = templateDescriptor;
         }
@@ -24,41 +24,48 @@ namespace TemplateProcessor.Core.Parsers
                 result = null;
                 return false;
             }
+            template = template.Trim('{', '}');
             var splittedTokens = template.Split('.');
             var rootName = splittedTokens[0];
-            var isExists = false;
-            var isCollection = false;
-            if (templateDescriptor.SingleTemplateEntities.ContainsKey(rootName))
-            {
-                isExists = true;
-                isCollection = false;
-            }
+            var invocationModel = GetPropertyInvocationModel(rootName);
+            rootName = invocationModel.Name;
 
-            if (templateDescriptor.CollectionTemplateEntities.ContainsKey(rootName))
+            if (!templateDescriptor.TemplateEntities.ContainsKey(rootName))
             {
-                isExists = true;
-                isCollection = true;
-            }
-            if (!isExists) 
-            { 
                 result = null;
                 return false;
+
             }
+
             result = new TemplateParseModel()
             {
-                RootName = rootName,
-                PropertiesInvokationChain = splittedTokens.Skip(1),
-                IsCollection = isCollection,
+                RootName = invocationModel.Name,
+                InvokeInCollectionIterator = invocationModel.InvokeInCollectionIterator,
+                PropertiesInvokationChain = splittedTokens.Skip(1).Select(GetPropertyInvocationModel),
             };
             return true;
         }
 
+        private PropertyInvocationModel GetPropertyInvocationModel(string memberName)
+        {
+            var invokeInCollectionIterator = memberName.StartsWith("[") && memberName.EndsWith("]") && memberName.Length > 2;
 
+
+            if (invokeInCollectionIterator)
+            {
+                memberName = memberName.Trim('[', ']');
+            }
+            return new PropertyInvocationModel()
+            {
+                InvokeInCollectionIterator = invokeInCollectionIterator,
+                Name = memberName,
+            };
+        }
 
         private bool IsValidTemplate(string template)
         {
             return template.StartsWith("{{") && template.EndsWith("}}") && template.Length > 4;
         }
-       
+
     }
 }

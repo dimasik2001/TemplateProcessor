@@ -7,7 +7,7 @@ namespace TemplateProcessor.Core.Models
     internal class TemplateParseModel
     {
         public string RootName { get; set; }
-        public bool IsCollection { get; set; }
-        public IEnumerable<string> PropertiesInvokationChain { get; set; }
+        public bool InvokeInCollectionIterator { get; set; }
+        public IEnumerable<PropertyInvocationModel> PropertiesInvokationChain { get; set; }
     }
 }

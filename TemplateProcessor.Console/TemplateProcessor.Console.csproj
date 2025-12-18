@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TemplateProcessor.Core\TemplateProcessor.Core.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -25,14 +25,13 @@ namespace TemplateProcessor.Core.Processor
         {
             if (_templateParser.TryParse(template, out var templateModel))
             {
-                if (!templateModel.IsCollection)
+                if (!templateModel.InvokeInCollectionIterator)
                 {
-                    throw new MemberAccessException($"Cannot get value from {_templateDescriptor.SingleTemplateEntities[templateModel.RootName]} because it is not a collection. Use GetValue method instead");
+                    throw new MemberAccessException($"Cannot get value from {_templateDescriptor.TemplateEntities[templateModel.RootName]} because it is not a collection. Use GetValue method instead");
                 }
 
-                IEnumerable<object> collection = _templateDescriptor.CollectionTemplateEntities[templateModel.RootName];
-
-                return collection.Select(x => InvokeChain(x, templateModel.PropertiesInvokationChain));
+                var collection = _templateDescriptor.TemplateEntities[templateModel.RootName] as IEnumerable<object>;
+                return collection.Select(x => InvokeChain(x, templateModel.PropertiesInvokationChain.Select(p => p.Name)));
                 
             }
             throw new ArgumentException($"No appropriate parameter for input tamplate: {template}");
@@ -42,13 +41,13 @@ namespace TemplateProcessor.Core.Processor
         {
             if(_templateParser.TryParse(template, out var templateModel))
             {
-                if (templateModel.IsCollection)
+                if (templateModel.InvokeInCollectionIterator)
                 {
-                    throw new MemberAccessException($"Cannot get value from {_templateDescriptor.CollectionTemplateEntities[templateModel.RootName]} because it is a collection. Use GetCollection method instead");
+                    throw new MemberAccessException($"Cannot get value from {_templateDescriptor.TemplateEntities[templateModel.RootName]} because it is a collection. Use GetCollection method instead");
                 }
 
-                object currentMember = _templateDescriptor.SingleTemplateEntities[templateModel.RootName];
-                currentMember = InvokeChain(currentMember, templateModel.PropertiesInvokationChain);
+                object currentMember = _templateDescriptor.TemplateEntities[templateModel.RootName];
+                currentMember = InvokeChain(currentMember, templateModel.PropertiesInvokationChain.Select(x => x.Name));
                 return currentMember;
             }
             throw new ArgumentException($"No appropriate parameter for input tamplate: {template}");
@@ -80,7 +79,7 @@ namespace TemplateProcessor.Core.Processor
 
         public bool IsCollectionTemplate(string template)
         {
-            return _templateParser.TryParse(template, out var templateModel) && templateModel.IsCollection;
+            return _templateParser.TryParse(template, out var templateModel) && (templateModel.InvokeInCollectionIterator || templateModel.PropertiesInvokationChain.Any(x => x.InvokeInCollectionIterator));
 
         }
 
