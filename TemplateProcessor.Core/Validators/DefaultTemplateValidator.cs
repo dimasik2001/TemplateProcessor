@@ -32,11 +32,6 @@ namespace TemplateProcessor.Core.Validators
             return true;
         }
 
-        public bool IsCollectionTemplate(string template)
-        {
-            return false;
-        }
-
         public bool IsTemplate(string template)
         {
             return template.StartsWith("{{") && template.EndsWith("}}") && template.Length > 4;

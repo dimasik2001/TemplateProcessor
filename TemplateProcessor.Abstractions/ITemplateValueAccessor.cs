@@ -6,5 +6,6 @@ namespace TemplateProcessor.Abstractions
     {    
         object GetValue(string template);
         IEnumerable<object> GetCollection(string template);
+        bool IsCollectionTemplate(string template);
     }
 }

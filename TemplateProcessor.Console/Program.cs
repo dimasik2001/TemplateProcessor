@@ -5,13 +5,27 @@ using TemplateProcessor.Core.TemplateStructureModels;
 using TemplateProcessor.Excel;
 
 
-var customer = new { Name = "Степан", INN = 12345};
+var customer = new { Name = "Степанxbr", INN = 12345};
+var pledge = new object[]
+{
+    new
+    {
+        Owner = "Tomas",
+        Name = "Car"
+    },
+
+    new
+    {
+        Owner = "Nick",
+        Name = "house"
+    }
+};
 var descriptor = new TemplateDescriptor();
 
 descriptor.SingleTemplateEntities["Customer"] = customer;
 //descriptor.SingleTemplateEntities["Report"] = report;
 
-//descriptor.CollectionTemplateEntities["Items"] = items.Cast<object>();
+descriptor.CollectionTemplateEntities["Items"] = pledge;
 
 var accessor = new DefaultTemplateValueAccessor(descriptor);
 //var engine = new EpplusExcelTemplateEngine(accessor);
