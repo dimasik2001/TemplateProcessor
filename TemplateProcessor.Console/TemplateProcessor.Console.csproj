@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TemplateProcessor.Core\TemplateProcessor.Core.csproj" />
+    <ProjectReference Include="..\TemplateProcessor.Excel\TemplateProcessor.Excel.csproj" />
   </ItemGroup>
 
 </Project>

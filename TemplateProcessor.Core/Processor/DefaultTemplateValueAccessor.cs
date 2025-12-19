@@ -7,18 +7,23 @@ using TemplateProcessor.Core.Models;
 using TemplateProcessor.Core.Parsers;
 using TemplateProcessor.Core.Parsers.Abstractions;
 using TemplateProcessor.Core.TemplateStructureModels;
+using TemplateProcessor.Core.Validators;
 
 namespace TemplateProcessor.Core.Processor
 {
     public class DefaultTemplateValueAccessor : ITemplateValueAccessor
     {
         private readonly TemplateDescriptor _templateDescriptor;
+
+        public ITemplateValidator TemplateValidator { get; }
+
         private readonly ITemplateParser _templateParser;
 
         public DefaultTemplateValueAccessor(TemplateDescriptor templateDescriptor)
         {
             _templateDescriptor = templateDescriptor;
-            _templateParser = new TemplateParser(templateDescriptor);
+            TemplateValidator = new DefaultTemplateValidator();
+            _templateParser = new TemplateParser(templateDescriptor, TemplateValidator);
         }
 
         public IEnumerable<object> GetCollection(string template)
@@ -83,6 +88,5 @@ namespace TemplateProcessor.Core.Processor
             return _templateParser.TryParse(template, out var templateModel) && templateModel.IsCollection;
 
         }
-
     }
 }

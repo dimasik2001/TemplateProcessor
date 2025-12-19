@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TemplateProcessor.Abstractions;
 using TemplateProcessor.Core.Models;
 using TemplateProcessor.Core.Parsers.Abstractions;
 using TemplateProcessor.Core.TemplateStructureModels;
@@ -11,15 +12,17 @@ namespace TemplateProcessor.Core.Parsers
     internal class TemplateParser : ITemplateParser
     {
         private readonly TemplateDescriptor templateDescriptor;
+        private readonly ITemplateValidator templateValidator;
 
-        public TemplateParser(TemplateDescriptor templateDescriptor) 
+        public TemplateParser(TemplateDescriptor templateDescriptor, ITemplateValidator templateValidator) 
         {
             this.templateDescriptor = templateDescriptor;
+            this.templateValidator = templateValidator;
         }
 
         public bool TryParse(string template, out TemplateParseModel result)
         {
-            if (!IsValidTemplate(template))
+            if (!templateValidator.IsTemplate(template))
             {
                 result = null;
                 return false;
@@ -52,13 +55,6 @@ namespace TemplateProcessor.Core.Parsers
                 IsCollection = isCollection,
             };
             return true;
-        }
-
-
-
-        private bool IsValidTemplate(string template)
-        {
-            return template.StartsWith("{{") && template.EndsWith("}}") && template.Length > 4;
         }
        
     }
