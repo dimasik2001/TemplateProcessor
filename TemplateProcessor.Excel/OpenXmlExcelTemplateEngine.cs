@@ -36,7 +36,7 @@ namespace TemplateProcessor.Excel
             }
         }
 
-        private void Render(Stream documentStream)
+        public void Render(Stream documentStream)
         {
             using (var document = SpreadsheetDocument.Open(documentStream, true))
             {
@@ -62,7 +62,15 @@ namespace TemplateProcessor.Excel
                                 var replaced = cellText;
                                 foreach (var template in templates.Where(t => !_valueAccessor.IsCollectionTemplate(t)))
                                 {
-                                    replaced = replaced.Replace(template, _valueAccessor.GetValue(template).ToString());
+                                    try
+                                    {
+                                        var value = _valueAccessor.GetValue(template);
+                                        if (value != null)
+                                        {
+                                            replaced = replaced.Replace(template, value.ToString());
+                                        }
+                                    }
+                                    catch (ArgumentException) { }
                                 }
                                 ExcelHelper.SetCellValue(cell, replaced, workbookPart);
 
@@ -90,7 +98,7 @@ namespace TemplateProcessor.Excel
 
                         }
                         var collectionTemplatesInRow = templatedCellsOfTemplatedRow.SelectMany(x => x.Value);
-                        var templatePathToCollectionMap = collectionTemplatesInRow.Distinct().ToDictionary(x => x, x => _valueAccessor.GetCollection(x).ToList());
+                        var templatePathToCollectionMap = collectionTemplatesInRow.Distinct().Select(x => new KeyValuePair<string, List<object>>(x, GetCollectionOrDefault(x))).Where(x => x.Value != null).ToDictionary(x => x.Key, x => x.Value);
                         var countOfNewRows = templatePathToCollectionMap.Max(x => x.Value.Count);
                         var rowsToCollectionTemplate = new List<Row>(countOfNewRows + 1);
                         rowsToCollectionTemplate.Add(templateRow);
@@ -113,7 +121,11 @@ namespace TemplateProcessor.Excel
                                     foreach (var template in templates.Where(templatePathToCollectionMap.ContainsKey))
                                     {
                                         var itemOfCollection = templatePathToCollectionMap[template][i];
-                                        replaceText = replaceText.Replace(template, itemOfCollection.ToString());
+
+                                        if (itemOfCollection != null)
+                                        {
+                                            replaceText = replaceText.Replace(template, itemOfCollection.ToString());
+                                        }
                                     }
 
                                     ExcelHelper.SetCellValue(cell, replaceText, workbookPart);
@@ -124,8 +136,21 @@ namespace TemplateProcessor.Excel
 
                 }
 
-            workbookPart.Workbook.Save();
+                workbookPart.Workbook.Save();
+            }
         }
+
+        private List<object> GetCollectionOrDefault(string x)
+        {
+            try
+            {
+                return _valueAccessor.GetCollection(x).ToList();
+            }
+            catch
+            {
+                return null;
+            }
+
         }
 
         static Row DuplicateRowExact(

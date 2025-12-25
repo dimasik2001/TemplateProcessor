@@ -9,5 +9,6 @@ namespace TemplateProcessor.Core.Models
         public string RootName { get; set; }
         public bool IsCollection { get; set; }
         public IEnumerable<string> PropertiesInvokationChain { get; set; }
+        public string Format {  get; set; }
     }
 }

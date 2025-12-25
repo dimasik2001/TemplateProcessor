@@ -22,12 +22,23 @@ namespace TemplateProcessor.Core.Parsers
 
         public bool TryParse(string template, out TemplateParseModel result)
         {
+            string format = null;
+            
             if (!templateValidator.IsTemplate(template))
             {
                 result = null;
                 return false;
             }
+
             template = template.Trim('{', '}');
+
+            if (template.Contains("|"))
+            {
+                var templateAndFormat = template.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                template = templateAndFormat[0].Trim();
+                format = templateAndFormat[1];
+            }
+
             var splittedTokens = template.Split('.');
             var rootName = splittedTokens[0];
             var isExists = false;
@@ -53,6 +64,7 @@ namespace TemplateProcessor.Core.Parsers
                 RootName = rootName,
                 PropertiesInvokationChain = splittedTokens.Skip(1),
                 IsCollection = isCollection,
+                Format = format,
             };
             return true;
         }

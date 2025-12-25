@@ -1,42 +1,42 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using DocumentFormat.OpenXml.Office.SpreadSheetML.Y2021.ExtLinks2021;
 using TemplateProcessor.Core.Processor;
 using TemplateProcessor.Core.TemplateStructureModels;
 using TemplateProcessor.Excel;
 
+object i = 5.4545345345m;
+Console.WriteLine(i.ToString());
 
-var customer = new { Name = "Степанxbr", INN = 12345};
-var pledge = new object[]
+//return;
+var account = new { Name = "Степанxbr", INN = 12345, Date = DateTime.Now};
+var pledges = new object[]
 {
     new
     {
         Price = 15600,
-        Number = 1,
         Owner = "Tomas",
         Name = "Car",
-        Id = 12345
     },
 
     new
     {
         Price = 200_000,
-        Number = 2,
-        Id = 54321,
         Owner = "Nick",
         Name = "house"
     }
 };
+
 var descriptor = new TemplateDescriptor();
 
-descriptor.SingleTemplateEntities["Customer"] = customer;
+descriptor.SingleTemplateEntities["Account"] = account;
 //descriptor.SingleTemplateEntities["Report"] = report;
-
-descriptor.CollectionTemplateEntities["Items"] = pledge;
+descriptor.CollectionTemplateEntities["Pledge"] = pledges;
+descriptor.CollectionTemplateEntities["PledgeIndex"] = pledges.Select((x, index) => (object)(index + 1));
+//descriptor.CollectionTemplateEntities["Items"] = pledge;
 
 var accessor = new DefaultTemplateValueAccessor(descriptor);
 //var engine = new EpplusExcelTemplateEngine(accessor);
 
-new OpenXmlExcelTemplateEngine(accessor, accessor.TemplateValidator).Render("Шаблон_ПКК.xlsx", "result.xlsx");
+new OpenXmlExcelTemplateEngine(accessor, accessor.TemplateValidator).Render("Template.xlsx", "result.xlsx");
 
 //Console.WriteLine("Hello, World!");
 //Console.WriteLine("Hello, World!");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using TemplateProcessor.Abstractions;
@@ -37,7 +38,7 @@ namespace TemplateProcessor.Core.Processor
 
                 IEnumerable<object> collection = _templateDescriptor.CollectionTemplateEntities[templateModel.RootName];
 
-                return collection.Select(x => InvokeChain(x, templateModel.PropertiesInvokationChain));
+                return collection.Select(x => InvokeChainAndFormat(x, templateModel));
                 
             }
             throw new ArgumentException($"No appropriate parameter for input tamplate: {template}");
@@ -53,10 +54,19 @@ namespace TemplateProcessor.Core.Processor
                 }
 
                 object currentMember = _templateDescriptor.SingleTemplateEntities[templateModel.RootName];
-                currentMember = InvokeChain(currentMember, templateModel.PropertiesInvokationChain);
-                return currentMember;
+                return InvokeChainAndFormat(currentMember, templateModel);
             }
             throw new ArgumentException($"No appropriate parameter for input tamplate: {template}");
+        }
+
+        private object InvokeChainAndFormat(object currentMember, TemplateParseModel templateModel)
+        {
+            currentMember = InvokeChain(currentMember, templateModel.PropertiesInvokationChain);
+            if (!string.IsNullOrEmpty(templateModel.Format) && currentMember is IFormattable formattable)
+            {
+                return formattable.ToString(templateModel.Format, CultureInfo.CurrentCulture);
+            }
+            return currentMember;
         }
 
         private object InvokeChain(object member, IEnumerable<string> propertyChain)

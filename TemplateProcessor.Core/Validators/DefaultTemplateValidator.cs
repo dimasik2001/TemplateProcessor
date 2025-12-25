@@ -9,9 +9,12 @@ namespace TemplateProcessor.Core.Validators
 {
     public class DefaultTemplateValidator : ITemplateValidator
     {
-        private static readonly Regex TemplateRegex =
-       new Regex(@"\{\{#?[\w]+(?:\.[\w]+)*\}\}",
-           RegexOptions.Compiled);
+        private static readonly Regex TemplateRegex = new Regex(
+        @"\{\{\s*
+          (?<path>[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)
+          (?:\s*\|\s*(?<format>[^}]+))?
+          \s*\}\}",
+        RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         public bool HasTemplates(string text, out IEnumerable<string> templates)
         {
             templates = Enumerable.Empty<string>();
