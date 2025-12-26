@@ -105,7 +105,7 @@ namespace TemplateProcessor.Excel
 
                         for (int i = 0; i < countOfNewRows - 1; i++)
                         {
-                            var newRow = DuplicateRowExact(worksheetPart, templateRow);
+                            var newRow = DuplicateRowExact(worksheetPart, rowsToCollectionTemplate[rowsToCollectionTemplate.Count - 1]);
                             rowsToCollectionTemplate.Add(newRow);
                         }
                         
