@@ -103,11 +103,12 @@ namespace TemplateProcessor.Excel
                         var rowsToCollectionTemplate = new List<Row>(countOfNewRows + 1);
                         rowsToCollectionTemplate.Add(templateRow);
 
-                        foreach (var itemIndex in Enumerable.Range(0, countOfNewRows - 1))
+                        for (int i = 0; i < countOfNewRows - 1; i++)
                         {
                             var newRow = DuplicateRowExact(worksheetPart, templateRow);
                             rowsToCollectionTemplate.Add(newRow);
                         }
+                        
 
                         for (int i = 0; i < rowsToCollectionTemplate.Count; i++)
                         {
@@ -120,7 +121,13 @@ namespace TemplateProcessor.Excel
                                     var replaceText = cellText;
                                     foreach (var template in templates.Where(templatePathToCollectionMap.ContainsKey))
                                     {
-                                        var itemOfCollection = templatePathToCollectionMap[template][i];
+                                        var collection = templatePathToCollectionMap[template];
+                                        if (collection == null || collection.Count < 1) 
+                                        {
+                                            replaceText = replaceText.Replace(template, string.Empty);
+                                            continue;
+                                        }
+                                        var itemOfCollection = collection[i];
 
                                         if (itemOfCollection != null)
                                         {

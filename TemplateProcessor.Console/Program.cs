@@ -7,7 +7,7 @@ object i = 5.4545345345m;
 Console.WriteLine(i.ToString());
 
 //return;
-var account = new { Name = "Степанxbr", INN = 12345, Date = DateTime.Now};
+var account = new { Name = "Степанxbr", INN = 12345, Date = 12.1324234234234m};
 var pledges = new object[]
 {
     new
@@ -30,7 +30,9 @@ var descriptor = new TemplateDescriptor();
 descriptor.SingleTemplateEntities["Account"] = account;
 //descriptor.SingleTemplateEntities["Report"] = report;
 descriptor.CollectionTemplateEntities["Pledge"] = pledges;
-descriptor.CollectionTemplateEntities["PledgeIndex"] = pledges.Select((x, index) => (object)(index + 1));
+descriptor.CollectionTemplateEntities["Pledger"] = Array.Empty<object>();// new[] {"First", "Second" };
+
+descriptor.AddIndexesForAllCollections(i => i + 1);
 //descriptor.CollectionTemplateEntities["Items"] = pledge;
 
 var accessor = new DefaultTemplateValueAccessor(descriptor);
