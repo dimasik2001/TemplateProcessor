@@ -79,7 +79,7 @@ namespace TemplateProcessor.Core.Processor
             return member;
         }
 
-        private object GetPropertyValue(object currentMember, string propertyName)
+        protected virtual object GetPropertyValue(object currentMember, string propertyName)
         {
             if (currentMember == null)
                 return null;
