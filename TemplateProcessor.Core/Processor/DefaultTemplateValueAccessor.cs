@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using TemplateProcessor.Abstractions;
 using TemplateProcessor.Core.Models;
 using TemplateProcessor.Core.Parsers;

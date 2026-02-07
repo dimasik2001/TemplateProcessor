@@ -29,10 +29,17 @@ namespace TemplateProcessor.Excel
             using (var ms = new MemoryStream())
             {
 
-                File.OpenRead(templatePath).CopyTo(ms);
+                using (var templateFs = File.OpenRead(templatePath))
+                {
+                    templateFs.CopyTo(ms);
+                }
 
                 Render(ms);
-                ms.WriteTo(File.Create(outputPath));
+
+                using (var outputFs = File.Create(outputPath))
+                {
+                    ms.WriteTo(outputFs);
+                }
             }
         }
 
