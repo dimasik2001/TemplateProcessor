@@ -1,0 +1,37 @@
+<Project>
+  <!--
+    Release build only: merges TemplateProcessor.Excel with all its dependencies
+    (TemplateProcessor.Core, TemplateProcessor.Abstractions, DocumentFormat.OpenXml, NPOI and its dependencies)
+    into a single assembly: bin\Release\netstandard2.0\merged\TemplateProcessor.Excel.dll.
+
+    Third-party types are internalized so they never conflict with other versions of the same
+    libraries already loaded by the host application. TemplateProcessor.* types stay public.
+  -->
+  <Target Name="ILRepackMerge" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <MergedOutputDir>$(OutputPath)merged\</MergedOutputDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <MergeAssemblies Include="$(OutputPath)$(TargetName)$(TargetExt)" />
+      <MergeAssemblies Include="$(OutputPath)*.dll" Exclude="$(OutputPath)$(TargetName)$(TargetExt)" />
+      <InternalizeExcludePatterns Include="^TemplateProcessor\." />
+      <!-- NPOI serializes these classes with XmlSerializer, which works only with public types. -->
+      <InternalizeExcludePatterns Include="^NPOI\.OpenXmlFormats\." />
+    </ItemGroup>
+
+    <MakeDir Directories="$(MergedOutputDir)" />
+
+    <ILRepack
+      Parallel="true"
+      DebugInfo="true"
+      Internalize="true"
+      InternalizeExclude="@(InternalizeExcludePatterns)"
+      RenameInternalized="false"
+      AllowDuplicateResources="false"
+      InputAssemblies="@(MergeAssemblies)"
+      LibraryPath="$(OutputPath)"
+      TargetKind="Dll"
+      OutputFile="$(MergedOutputDir)$(TargetName)$(TargetExt)" />
+  </Target>
+</Project>

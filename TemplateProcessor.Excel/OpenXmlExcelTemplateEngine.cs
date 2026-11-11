@@ -43,14 +43,30 @@ namespace TemplateProcessor.Excel
             }
         }
 
+        /// <summary>
+        /// Renders templates in place. A legacy .xls template is converted to .xlsx in memory first,
+        /// so the stream always ends up containing an .xlsx document.
+        /// The stream must be readable, writable and seekable.
+        /// </summary>
         public void Render(Stream documentStream)
         {
+            if (XlsToXlsxConverter.IsXls(documentStream))
+            {
+                using (var xlsx = XlsToXlsxConverter.Convert(documentStream))
+                {
+                    documentStream.Position = 0;
+                    documentStream.SetLength(0);
+                    xlsx.CopyTo(documentStream);
+                    documentStream.Position = 0;
+                }
+            }
+
             using (var document = SpreadsheetDocument.Open(documentStream, true))
             {
                 var workbookPart = document.WorkbookPart;
-                var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
 
-                foreach (var worksheetPart in workbookPart.WorksheetParts)
+                // ToList: SetCellValue may add a SharedStringTablePart to the workbook while we iterate.
+                foreach (var worksheetPart in workbookPart.WorksheetParts.ToList())
                 {
                     var sheet = worksheetPart.Worksheet;
                     var sheetData = sheet.GetFirstChild<SheetData>();
@@ -60,7 +76,7 @@ namespace TemplateProcessor.Excel
                     {
                         foreach (var cell in row.Elements<Cell>())
                         {
-                            string cellText = ExcelHelper.GetCellValue(cell, sharedStringTable);
+                            string cellText = ExcelHelper.GetCellValue(cell, workbookPart);
 
                             if (cellText != null && _templateValidator.HasTemplates(cellText, out var templates))
                             {
@@ -96,7 +112,7 @@ namespace TemplateProcessor.Excel
                         var templatedCellsOfTemplatedRow = new Dictionary<Cell, IEnumerable<string>>();
                         foreach (var cell in templateRow.Elements<Cell>())
                         {
-                            string cellText = ExcelHelper.GetCellValue(cell, sharedStringTable);
+                            string cellText = ExcelHelper.GetCellValue(cell, workbookPart);
 
                             if (cellText != null && _templateValidator.HasTemplates(cellText, out var templates) && templates.Any(t => _valueAccessor.IsCollectionTemplate(t)))
                             {
@@ -121,7 +137,7 @@ namespace TemplateProcessor.Excel
                         {
                             foreach (var cell in rowsToCollectionTemplate[i].Elements<Cell>())
                             {
-                                string cellText = ExcelHelper.GetCellValue(cell, sharedStringTable);
+                                string cellText = ExcelHelper.GetCellValue(cell, workbookPart);
 
                                 if (cellText != null && _templateValidator.HasTemplates(cellText, out var templates))
                                 {
@@ -129,7 +145,8 @@ namespace TemplateProcessor.Excel
                                     foreach (var template in templates.Where(templatePathToCollectionMap.ContainsKey))
                                     {
                                         var collection = templatePathToCollectionMap[template];
-                                        if (collection == null || collection.Count < 1) 
+                                        // Collections in one row may differ in length: rows beyond the end of a shorter one get empty values.
+                                        if (collection == null || collection.Count <= i)
                                         {
                                             replaceText = replaceText.Replace(template, string.Empty);
                                             continue;

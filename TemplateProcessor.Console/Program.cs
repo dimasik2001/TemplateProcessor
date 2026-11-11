@@ -46,23 +46,27 @@ var people = new List<Person>
     new Person { Name = "Богдан Сидоренко", Status = "Активний", Number = GenerateIpn(random), Date = new DateTime(2025, 1, 15) }
 };
 
-var descriptor = new TemplateDescriptor();
-descriptor.CollectionTemplateEntities["person"] = people;
+//var descriptor = new TemplateDescriptor();
+//descriptor.CollectionTemplateEntities["person"] = people;
 
 
 
-descriptor.SingleTemplateEntities["Account"] = account;
-//descriptor.SingleTemplateEntities["Report"] = report;
-descriptor.CollectionTemplateEntities["Pledge"] = pledges;
-descriptor.CollectionTemplateEntities["Pledger"] = Array.Empty<object>();// new[] {"First", "Second" };
+//descriptor.SingleTemplateEntities["Account"] = account;
+////descriptor.SingleTemplateEntities["Report"] = report;
+//descriptor.CollectionTemplateEntities["Pledge"] = pledges;
+//descriptor.CollectionTemplateEntities["Pledger"] = Array.Empty<object>();// new[] {"First", "Second" };
 
-descriptor.AddIndexesForAllCollections(i => i + 1);
+//descriptor.AddIndexesForAllCollections(i => i + 1);
 //descriptor.CollectionTemplateEntities["Items"] = pledge;
-
+var descriptor = new TemplateDescriptor();
+descriptor.SingleTemplateEntities["moneyValue"] = 29323423;
+descriptor.SingleTemplateEntities["data"] = DateTime.Now;
 var accessor = new DefaultTemplateValueAccessor(descriptor);
 //var engine = new EpplusExcelTemplateEngine(accessor);
 
-new OpenXmlExcelTemplateEngine(accessor, accessor.TemplateValidator).Render("Template.xlsx", "result.xlsx");
+var engine = new OpenXmlExcelTemplateEngine(accessor, accessor.TemplateValidator);
+engine.Render("Template.xls", "result_from_xls.xlsx");
+engine.Render("Template.xlsx", "result.xlsx");
 
 //Console.WriteLine("Hello, World!");
 //Console.WriteLine("Hello, World!");

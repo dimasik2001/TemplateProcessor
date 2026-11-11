@@ -8,15 +8,15 @@ public class ExcelHelper
     public static void ReplaceInExcel(SpreadsheetDocument document, string oldValue, string newValue)
     {
             var workbookPart = document.WorkbookPart;
-            var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
 
-            foreach (var worksheetPart in workbookPart.WorksheetParts)
+            // ToList: SetCellValue may add a SharedStringTablePart to the workbook while we iterate.
+            foreach (var worksheetPart in workbookPart.WorksheetParts.ToList())
             {
                 var cells = worksheetPart.Worksheet.Descendants<Cell>();
 
                 foreach (var cell in cells)
                 {
-                    string cellText = GetCellValue(cell, sharedStringTable);
+                    string cellText = GetCellValue(cell, workbookPart);
 
                     if (cellText != null && cellText.Contains(oldValue))
                     {
@@ -29,8 +29,23 @@ public class ExcelHelper
             workbookPart.Workbook.Save();
     }
 
+    /// <summary>
+    /// Reads the shared string table at call time: it may be created later by <see cref="SetCellValue"/>
+    /// (e.g. a workbook that had only inline strings).
+    /// </summary>
+    public static string GetCellValue(Cell cell, WorkbookPart workbookPart)
+    {
+        return GetCellValue(cell, workbookPart.SharedStringTablePart?.SharedStringTable);
+    }
+
     public static string GetCellValue(Cell cell, SharedStringTable sharedStringTable)
     {
+        // Inline strings (<c t="inlineStr"><is><t>...</t></is></c>) are written by many generators instead of shared strings.
+        if (cell.DataType?.Value == CellValues.InlineString)
+        {
+            return cell.InlineString?.InnerText;
+        }
+
         if (cell.CellValue == null)
             return null;
 
@@ -57,6 +72,8 @@ public class ExcelHelper
 
         int index = InsertSharedStringItem(text, sharedStringTablePart);
 
+        // The cell becomes a shared string, so drop the inline value if it had one.
+        cell.InlineString = null;
         cell.CellValue = new CellValue(index.ToString());
         cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
     }
